@@ -11,6 +11,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTrucks } from '../context/TruckContext';
 import { TruckStatus } from '../types/truck';
+import { COLORS, SHADOWS, SPACING, RADIUS, FONT } from '../theme';
 
 type RootStackParamList = {
   TruckList: { status: TruckStatus };
@@ -25,11 +26,22 @@ type TruckDetailScreenRouteProp = RouteProp<RootStackParamList, 'TruckDetail'>;
 const getStatusColor = (status: TruckStatus): string => {
   switch (status) {
     case 'En service':
-      return '#4CAF50';
+      return COLORS.success;
     case 'À l\'arrêt':
-      return '#FF9800';
+      return COLORS.warning;
     case 'En maintenance':
-      return '#F44336';
+      return COLORS.danger;
+  }
+};
+
+const getStatusBg = (status: TruckStatus): string => {
+  switch (status) {
+    case 'En service':
+      return COLORS.successLight;
+    case 'À l\'arrêt':
+      return COLORS.warningLight;
+    case 'En maintenance':
+      return COLORS.dangerLight;
   }
 };
 
@@ -43,7 +55,7 @@ const TruckDetailScreen: React.FC = () => {
   if (!truck) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>Camion non trouvé</Text>
+        <Text style={styles.notFoundText}>Camion non trouvé</Text>
       </View>
     );
   }
@@ -75,51 +87,70 @@ const TruckDetailScreen: React.FC = () => {
   const statuses: TruckStatus[] = ['En service', 'À l\'arrêt', 'En maintenance'];
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.plateContainer}>
-          <View style={[styles.colorDot, { backgroundColor: truck.color }]} />
-          <Text style={styles.plateNumber}>{truck.plateNumber}</Text>
-        </View>
-        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(truck.status) }]}>
-          <Text style={styles.statusText}>{truck.status}</Text>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <View style={styles.heroSection}>
+        <View style={styles.heroContent}>
+          <View style={styles.plateRow}>
+            <View style={[styles.colorDot, { backgroundColor: truck.color }]} />
+            <Text style={styles.plateNumber}>{truck.plateNumber}</Text>
+          </View>
+          <View style={[styles.statusBadge, { backgroundColor: getStatusBg(truck.status) }]}>
+            <View style={[styles.statusDot, { backgroundColor: getStatusColor(truck.status) }]} />
+            <Text style={[styles.statusText, { color: getStatusColor(truck.status) }]}>
+              {truck.status}
+            </Text>
+          </View>
         </View>
       </View>
 
       {oilChangeDue && (
         <View style={styles.oilChangeAlert}>
-          <Text style={styles.oilChangeAlertText}>
-            VIDANGE REQUISE - Kilometrage actuel ({truck.mileage.toLocaleString()} km) a atteint ou depasse le seuil ({truck.nextOilChangeMileage.toLocaleString()} km)
-          </Text>
+          <View style={styles.oilChangeIconContainer}>
+            <Text style={styles.oilChangeAlertIcon}>!</Text>
+          </View>
+          <View style={styles.oilChangeContent}>
+            <Text style={styles.oilChangeAlertTitle}>VIDANGE REQUISE</Text>
+            <Text style={styles.oilChangeAlertText}>
+              Le kilométrage actuel ({truck.mileage.toLocaleString()} km) a atteint ou dépassé le seuil ({truck.nextOilChangeMileage.toLocaleString()} km)
+            </Text>
+          </View>
         </View>
       )}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Informations</Text>
 
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Couleur</Text>
-          <View style={styles.infoValueContainer}>
-            <View style={[styles.colorDotSmall, { backgroundColor: truck.color }]} />
-            <Text style={styles.infoValue}>{truck.color}</Text>
+        <View style={styles.infoCard}>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Couleur</Text>
+            <View style={styles.infoValueContainer}>
+              <View style={[styles.colorDotSmall, { backgroundColor: truck.color }]} />
+              <Text style={styles.infoValue}>{truck.color}</Text>
+            </View>
           </View>
-        </View>
 
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Type de carburant</Text>
-          <Text style={styles.infoValue}>{truck.fuelType}</Text>
-        </View>
+          <View style={styles.infoSeparator} />
 
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Kilometrage</Text>
-          <Text style={styles.infoValue}>{truck.mileage.toLocaleString()} km</Text>
-        </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Type de carburant</Text>
+            <Text style={styles.infoValue}>{truck.fuelType}</Text>
+          </View>
 
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Prochaine vidange</Text>
-          <Text style={[styles.infoValue, oilChangeDue && styles.dangerText]}>
-            {truck.nextOilChangeMileage.toLocaleString()} km
-          </Text>
+          <View style={styles.infoSeparator} />
+
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Kilométrage</Text>
+            <Text style={styles.infoValue}>{truck.mileage.toLocaleString()} km</Text>
+          </View>
+
+          <View style={styles.infoSeparator} />
+
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Prochaine vidange</Text>
+            <Text style={[styles.infoValue, oilChangeDue && styles.dangerText]}>
+              {truck.nextOilChangeMileage.toLocaleString()} km
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -131,13 +162,17 @@ const TruckDetailScreen: React.FC = () => {
               key={status}
               style={[
                 styles.statusButton,
-                { backgroundColor: getStatusColor(status) },
+                { backgroundColor: getStatusBg(status), borderColor: getStatusColor(status) },
                 truck.status === status && styles.activeStatusButton,
               ]}
               onPress={() => handleStatusChange(status)}
               disabled={truck.status === status}
+              activeOpacity={0.7}
             >
-              <Text style={styles.statusButtonText}>{status}</Text>
+              <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(status) }]} />
+              <Text style={[styles.statusButtonText, { color: getStatusColor(status) }]}>
+                {status}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -147,11 +182,16 @@ const TruckDetailScreen: React.FC = () => {
         <TouchableOpacity
           style={styles.editButton}
           onPress={() => navigation.navigate('EditTruck', { truckId: truck.id })}
+          activeOpacity={0.8}
         >
           <Text style={styles.editButtonText}>Modifier</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={handleDelete}
+          activeOpacity={0.8}
+        >
           <Text style={styles.deleteButtonText}>Supprimer</Text>
         </TouchableOpacity>
       </View>
@@ -162,100 +202,152 @@ const TruckDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
   },
-  errorText: {
-    fontSize: 16,
-    color: '#666',
+  notFoundText: {
+    fontSize: FONT.medium,
+    color: COLORS.textHint,
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: SPACING.xxl * 2,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 16,
+  heroSection: {
+    backgroundColor: COLORS.surface,
+    padding: SPACING.xl,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: COLORS.borderLight,
   },
-  plateContainer: {
+  heroContent: {
+    alignItems: 'center',
+  },
+  plateRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: SPACING.md,
   },
   colorDot: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    marginRight: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: SPACING.md,
+    borderWidth: 3,
+    borderColor: 'rgba(0,0,0,0.06)',
   },
   plateNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: FONT.large,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    letterSpacing: 1,
   },
   statusBadge: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.full,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: SPACING.sm,
   },
   statusText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
+    fontWeight: '700',
+    fontSize: 13,
+    letterSpacing: 0.3,
   },
   oilChangeAlert: {
-    backgroundColor: '#FFF3E0',
-    borderLeftWidth: 4,
-    borderLeftColor: '#FF9800',
-    padding: 12,
-    margin: 16,
+    flexDirection: 'row',
+    backgroundColor: COLORS.warningLight,
+    borderWidth: 1,
+    borderColor: '#FFE0B2',
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.lg,
+    borderRadius: RADIUS.md,
+    padding: SPACING.lg,
+    ...SHADOWS.small,
+  },
+  oilChangeIconContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: COLORS.warning,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.md,
+  },
+  oilChangeAlertIcon: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  oilChangeContent: {
+    flex: 1,
+  },
+  oilChangeAlertTitle: {
+    color: COLORS.warning,
+    fontWeight: '700',
+    fontSize: 13,
+    letterSpacing: 0.5,
+    marginBottom: SPACING.xs,
   },
   oilChangeAlertText: {
-    color: '#E65100',
-    fontSize: 14,
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    lineHeight: 18,
   },
   section: {
-    backgroundColor: '#fff',
-    margin: 16,
-    padding: 16,
-    borderRadius: 12,
+    marginTop: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
+    fontSize: FONT.semibold,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.md,
+    letterSpacing: 0.2,
+  },
+  infoCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.md,
+    padding: SPACING.lg,
+    ...SHADOWS.small,
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    paddingVertical: SPACING.sm + 2,
   },
   infoLabel: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: FONT.regular,
+    color: COLORS.textSecondary,
+    fontWeight: '500',
   },
   infoValue: {
-    fontSize: 16,
+    fontSize: FONT.medium,
     fontWeight: '600',
-    color: '#333',
+    color: COLORS.textPrimary,
   },
   infoValueContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   colorDotSmall: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    marginRight: 8,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    marginRight: SPACING.sm,
+    borderWidth: 1.5,
+    borderColor: 'rgba(0,0,0,0.08)',
+  },
+  infoSeparator: {
+    height: 1,
+    backgroundColor: COLORS.borderLight,
   },
   dangerText: {
-    color: '#F44336',
+    color: COLORS.danger,
+    fontWeight: '700',
   },
   statusButtons: {
     flexDirection: 'row',
@@ -263,49 +355,62 @@ const styles = StyleSheet.create({
   },
   statusButton: {
     flex: 1,
-    marginHorizontal: 4,
-    paddingVertical: 12,
-    borderRadius: 8,
+    flexDirection: 'row',
+    marginHorizontal: SPACING.xs,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1.5,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   activeStatusButton: {
-    opacity: 0.5,
+    opacity: 0.4,
+  },
+  statusIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: SPACING.xs + 2,
   },
   statusButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
   actions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 16,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.xl,
+    paddingBottom: SPACING.xxl * 2,
   },
   editButton: {
     flex: 1,
-    backgroundColor: '#2196F3',
-    paddingVertical: 16,
-    borderRadius: 8,
-    marginRight: 8,
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.lg,
+    borderRadius: RADIUS.sm,
+    marginRight: SPACING.sm,
     alignItems: 'center',
+    ...SHADOWS.small,
   },
   editButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: COLORS.white,
+    fontSize: FONT.medium,
+    fontWeight: '700',
   },
   deleteButton: {
     flex: 1,
-    backgroundColor: '#F44336',
-    paddingVertical: 16,
-    borderRadius: 8,
-    marginLeft: 8,
+    backgroundColor: COLORS.danger,
+    paddingVertical: SPACING.lg,
+    borderRadius: RADIUS.sm,
+    marginLeft: SPACING.sm,
     alignItems: 'center',
+    ...SHADOWS.small,
   },
   deleteButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: COLORS.white,
+    fontSize: FONT.medium,
+    fontWeight: '700',
   },
 });
 

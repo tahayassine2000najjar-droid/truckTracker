@@ -11,6 +11,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTrucks } from '../context/TruckContext';
 import { TruckStatus } from '../types/truck';
+import { COLORS, SHADOWS, SPACING, RADIUS, FONT } from '../theme';
 
 type RootStackParamList = {
   TruckList: { status: TruckStatus };
@@ -21,6 +22,28 @@ type RootStackParamList = {
 
 type EditTruckScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'EditTruck'>;
 type EditTruckScreenRouteProp = RouteProp<RootStackParamList, 'EditTruck'>;
+
+const getStatusColor = (status: TruckStatus): string => {
+  switch (status) {
+    case 'En service':
+      return COLORS.success;
+    case 'À l\'arrêt':
+      return COLORS.warning;
+    case 'En maintenance':
+      return COLORS.danger;
+  }
+};
+
+const getStatusBg = (status: TruckStatus): string => {
+  switch (status) {
+    case 'En service':
+      return COLORS.successLight;
+    case 'À l\'arrêt':
+      return COLORS.warningLight;
+    case 'En maintenance':
+      return COLORS.dangerLight;
+  }
+};
 
 const EditTruckScreen: React.FC = () => {
   const navigation = useNavigation<EditTruckScreenNavigationProp>();
@@ -58,7 +81,7 @@ const EditTruckScreen: React.FC = () => {
   if (!truck) {
     return (
       <View style={styles.container}>
-        <Text style={styles.notFoundText}>Camion non trouve</Text>
+        <Text style={styles.notFoundText}>Camion non trouvé</Text>
       </View>
     );
   }
@@ -79,15 +102,15 @@ const EditTruckScreen: React.FC = () => {
     }
 
     if (!mileage.trim()) {
-      newErrors.mileage = 'Le kilometrage est requis';
+      newErrors.mileage = 'Le kilométrage est requis';
     } else if (isNaN(Number(mileage)) || Number(mileage) < 0) {
-      newErrors.mileage = 'Le kilometrage doit etre un nombre valide';
+      newErrors.mileage = 'Le kilométrage doit être un nombre valide';
     }
 
     if (!nextOilChangeMileage.trim()) {
-      newErrors.nextOilChangeMileage = 'Le kilometrage de la prochaine vidange est requis';
+      newErrors.nextOilChangeMileage = 'Le kilométrage de la prochaine vidange est requis';
     } else if (isNaN(Number(nextOilChangeMileage)) || Number(nextOilChangeMileage) < 0) {
-      newErrors.nextOilChangeMileage = 'Le kilometrage doit etre un nombre valide';
+      newErrors.nextOilChangeMileage = 'Le kilométrage doit être un nombre valide';
     }
 
     setErrors(newErrors);
@@ -114,9 +137,10 @@ const EditTruckScreen: React.FC = () => {
   const statuses: TruckStatus[] = ['En service', 'À l\'arrêt', 'En maintenance'];
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.form}>
         <Text style={styles.title}>Modifier le camion</Text>
+        <Text style={styles.subtitle}>Modifiez les informations du camion</Text>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Immatriculation *</Text>
@@ -125,6 +149,7 @@ const EditTruckScreen: React.FC = () => {
             value={plateNumber}
             onChangeText={setPlateNumber}
             placeholder="AB-123-CD"
+            placeholderTextColor={COLORS.textHint}
           />
           {errors.plateNumber && <Text style={styles.errorText}>{errors.plateNumber}</Text>}
         </View>
@@ -136,6 +161,7 @@ const EditTruckScreen: React.FC = () => {
             value={color}
             onChangeText={setColor}
             placeholder="Ex: #2196F3 ou Bleu"
+            placeholderTextColor={COLORS.textHint}
           />
           {errors.color && <Text style={styles.errorText}>{errors.color}</Text>}
         </View>
@@ -147,17 +173,19 @@ const EditTruckScreen: React.FC = () => {
             value={fuelType}
             onChangeText={setFuelType}
             placeholder="Diesel, Essence, GPL..."
+            placeholderTextColor={COLORS.textHint}
           />
           {errors.fuelType && <Text style={styles.errorText}>{errors.fuelType}</Text>}
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Kilometrage *</Text>
+          <Text style={styles.label}>Kilométrage *</Text>
           <TextInput
             style={[styles.input, errors.mileage && styles.inputError]}
             value={mileage}
             onChangeText={setMileage}
             placeholder="Ex: 50000"
+            placeholderTextColor={COLORS.textHint}
             keyboardType="numeric"
           />
           {errors.mileage && <Text style={styles.errorText}>{errors.mileage}</Text>}
@@ -171,16 +199,14 @@ const EditTruckScreen: React.FC = () => {
                 key={s}
                 style={[
                   styles.statusButton,
+                  { backgroundColor: getStatusBg(s), borderColor: getStatusColor(s) },
                   status === s && styles.activeStatusButton,
                 ]}
                 onPress={() => setStatus(s)}
+                activeOpacity={0.7}
               >
-                <Text
-                  style={[
-                    styles.statusButtonText,
-                    status === s && styles.activeStatusButtonText,
-                  ]}
-                >
+                <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(s) }]} />
+                <Text style={[styles.statusButtonText, { color: getStatusColor(s) }]}>
                   {s}
                 </Text>
               </TouchableOpacity>
@@ -189,12 +215,13 @@ const EditTruckScreen: React.FC = () => {
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Kilometrage prevu pour la prochaine vidange *</Text>
+          <Text style={styles.label}>Kilométrage prévu pour la prochaine vidange *</Text>
           <TextInput
             style={[styles.input, errors.nextOilChangeMileage && styles.inputError]}
             value={nextOilChangeMileage}
             onChangeText={setNextOilChangeMileage}
             placeholder="Ex: 60000"
+            placeholderTextColor={COLORS.textHint}
             keyboardType="numeric"
           />
           {errors.nextOilChangeMileage && (
@@ -202,13 +229,14 @@ const EditTruckScreen: React.FC = () => {
           )}
         </View>
 
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit} activeOpacity={0.8}>
           <Text style={styles.submitButtonText}>Enregistrer les modifications</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.cancelButton}
           onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
         >
           <Text style={styles.cancelButtonText}>Annuler</Text>
         </TouchableOpacity>
@@ -220,47 +248,56 @@ const EditTruckScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
   },
   notFoundText: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: FONT.medium,
+    color: COLORS.textHint,
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: SPACING.xxl * 2,
   },
   form: {
-    padding: 16,
+    padding: SPACING.xl,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 24,
+    fontSize: FONT.title,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.xs,
+  },
+  subtitle: {
+    fontSize: FONT.regular,
+    color: COLORS.textHint,
+    marginBottom: SPACING.xxl + SPACING.sm,
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: SPACING.xl,
   },
   label: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.sm,
+    letterSpacing: 0.2,
   },
   input: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+    borderRadius: RADIUS.sm,
+    padding: SPACING.lg,
+    fontSize: FONT.medium,
+    color: COLORS.textPrimary,
   },
   inputError: {
-    borderColor: '#F44336',
+    borderColor: COLORS.danger,
+    backgroundColor: COLORS.dangerLight,
   },
   errorText: {
-    color: '#F44336',
+    color: COLORS.danger,
     fontSize: 12,
-    marginTop: 4,
+    marginTop: SPACING.xs,
+    fontWeight: '500',
   },
   statusButtons: {
     flexDirection: 'row',
@@ -268,47 +305,53 @@ const styles = StyleSheet.create({
   },
   statusButton: {
     flex: 1,
-    marginHorizontal: 4,
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ddd',
+    flexDirection: 'row',
+    marginHorizontal: SPACING.xs,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1.5,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   activeStatusButton: {
-    backgroundColor: '#2196F3',
-    borderColor: '#2196F3',
+    opacity: 0.4,
+  },
+  statusIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: SPACING.xs + 2,
   },
   statusButtonText: {
-    fontSize: 12,
-    color: '#333',
-  },
-  activeStatusButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
   submitButton: {
-    backgroundColor: '#2196F3',
-    paddingVertical: 16,
-    borderRadius: 8,
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.lg,
+    borderRadius: RADIUS.sm,
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: SPACING.lg,
+    ...SHADOWS.small,
   },
   submitButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: COLORS.white,
+    fontSize: FONT.medium,
+    fontWeight: '700',
   },
   cancelButton: {
-    paddingVertical: 16,
-    borderRadius: 8,
+    paddingVertical: SPACING.lg,
+    borderRadius: RADIUS.sm,
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: SPACING.md,
+    backgroundColor: COLORS.surfaceAlt,
   },
   cancelButtonText: {
-    color: '#666',
-    fontSize: 16,
+    color: COLORS.textSecondary,
+    fontSize: FONT.medium,
+    fontWeight: '600',
   },
 });
 

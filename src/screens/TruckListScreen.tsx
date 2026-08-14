@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTrucks } from '../context/TruckContext';
 import { Truck, TruckStatus } from '../types/truck';
 import TruckCard from '../components/TruckCard';
+import { COLORS, SHADOWS, SPACING, RADIUS, FONT } from '../theme';
 
 type RootStackParamList = {
   TruckList: { status: TruckStatus };
@@ -38,10 +39,22 @@ const TruckListScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.counterBar}>
+        <Text style={styles.counterText}>
+          {filteredTrucks.length} camion{filteredTrucks.length !== 1 ? 's' : ''}
+        </Text>
+      </View>
+
       {filteredTrucks.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Aucun camion dans cette catégorie</Text>
-          <TouchableOpacity style={styles.addButton} onPress={handleAddTruck}>
+          <View style={styles.emptyIconContainer}>
+            <Text style={styles.emptyIcon}>🚛</Text>
+          </View>
+          <Text style={styles.emptyTitle}>Aucun camion</Text>
+          <Text style={styles.emptySubtitle}>
+            Aucun camion n'est actuellement dans cette catégorie
+          </Text>
+          <TouchableOpacity style={styles.addButton} onPress={handleAddTruck} activeOpacity={0.8}>
             <Text style={styles.addButtonText}>+ Ajouter un camion</Text>
           </TouchableOpacity>
         </View>
@@ -51,8 +64,9 @@ const TruckListScreen: React.FC = () => {
           renderItem={renderTruck}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
           ListFooterComponent={
-            <TouchableOpacity style={styles.addButton} onPress={handleAddTruck}>
+            <TouchableOpacity style={styles.addButton} onPress={handleAddTruck} activeOpacity={0.8}>
               <Text style={styles.addButtonText}>+ Ajouter un camion</Text>
             </TouchableOpacity>
           }
@@ -65,34 +79,68 @@ const TruckListScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
+  },
+  counterBar: {
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm + 2,
+    backgroundColor: COLORS.background,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderLight,
+  },
+  counterText: {
+    fontSize: 13,
+    color: COLORS.textHint,
+    fontWeight: '500',
   },
   listContent: {
-    paddingVertical: 8,
-    paddingBottom: 80,
+    paddingTop: SPACING.sm,
+    paddingBottom: 100,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: SPACING.xxl * 2,
   },
-  emptyText: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 16,
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: COLORS.surfaceAlt,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  emptyIcon: {
+    fontSize: 36,
+  },
+  emptyTitle: {
+    fontSize: FONT.bold,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.sm,
+  },
+  emptySubtitle: {
+    fontSize: FONT.regular,
+    color: COLORS.textHint,
+    textAlign: 'center',
+    marginBottom: SPACING.xxl,
+    lineHeight: 22,
   },
   addButton: {
-    backgroundColor: '#2196F3',
-    paddingVertical: 16,
-    borderRadius: 8,
-    marginHorizontal: 16,
-    marginVertical: 8,
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.lg,
+    borderRadius: RADIUS.sm,
+    marginHorizontal: SPACING.lg,
+    marginVertical: SPACING.sm,
     alignItems: 'center',
+    ...SHADOWS.small,
   },
   addButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: COLORS.white,
+    fontSize: FONT.medium,
+    fontWeight: '600',
   },
 });
 

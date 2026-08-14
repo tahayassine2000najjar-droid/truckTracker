@@ -1,10 +1,12 @@
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import TruckListScreen from '../screens/TruckListScreen';
 import TruckDetailScreen from '../screens/TruckDetailScreen';
 import AddTruckScreen from '../screens/AddTruckScreen';
 import EditTruckScreen from '../screens/EditTruckScreen';
 import { TruckStatus } from '../types/truck';
+import { COLORS, FONT } from '../theme';
 
 type RootStackParamList = {
   TruckList: { status: TruckStatus };
@@ -24,11 +26,18 @@ const TruckStackNavigator: React.FC<TruckStackNavigatorProps> = ({ status }) => 
     <Stack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: '#2196F3',
+          backgroundColor: COLORS.primary,
         },
-        headerTintColor: '#fff',
+        headerTintColor: COLORS.white,
         headerTitleStyle: {
-          fontWeight: 'bold',
+          fontWeight: '700',
+          fontSize: FONT.semibold,
+          letterSpacing: 0.3,
+        },
+        headerShadowVisible: false,
+        headerBackTitleVisible: false,
+        contentStyle: {
+          backgroundColor: COLORS.background,
         },
       }}
     >
@@ -37,13 +46,13 @@ const TruckStackNavigator: React.FC<TruckStackNavigatorProps> = ({ status }) => 
         component={TruckListScreen}
         initialParams={{ status }}
         options={{
-          title: `TruckTracker - ${status}`,
+          title: `TruckTracker · ${status}`,
         }}
       />
       <Stack.Screen
         name="TruckDetail"
         component={TruckDetailScreen}
-        options={{ title: 'Detail du camion' }}
+        options={{ title: 'Détail du camion' }}
       />
       <Stack.Screen
         name="AddTruck"

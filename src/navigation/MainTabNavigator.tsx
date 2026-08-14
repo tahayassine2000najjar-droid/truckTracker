@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text, View, StyleSheet } from 'react-native';
 import TruckStackNavigator from './TruckStackNavigator';
 import { TruckStatus } from '../types/truck';
+import { COLORS, SPACING } from '../theme';
 
 type TabParamList = {
   'En service': { status: TruckStatus };
@@ -12,15 +13,16 @@ type TabParamList = {
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
-const TabIcon: React.FC<{ label: string; color: string; focused: boolean }> = ({
-  label,
-  color,
-  focused,
-}) => (
-  <View style={styles.tabIcon}>
-    <Text style={[styles.tabIconText, { color }]}>{focused ? '●' : '○'}</Text>
-    <Text style={[styles.tabLabel, { color }]}>{label}</Text>
-  </View>
+const TruckIcon: React.FC<{ color: string; focused: boolean }> = ({ color, focused }) => (
+  <Text style={[styles.icon, { color, opacity: focused ? 1 : 0.5 }]}>🚛</Text>
+);
+
+const StopIcon: React.FC<{ color: string; focused: boolean }> = ({ color, focused }) => (
+  <Text style={[styles.icon, { color, opacity: focused ? 1 : 0.5 }]}>⏸️</Text>
+);
+
+const WrenchIcon: React.FC<{ color: string; focused: boolean }> = ({ color, focused }) => (
+  <Text style={[styles.icon, { color, opacity: focused ? 1 : 0.5 }]}>🔧</Text>
 );
 
 const MainTabNavigator: React.FC = () => {
@@ -28,14 +30,23 @@ const MainTabNavigator: React.FC = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#2196F3',
-        tabBarInactiveTintColor: '#999',
+        tabBarActiveTintColor: COLORS.primary,
+        tabBarInactiveTintColor: COLORS.textHint,
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
+          letterSpacing: 0.2,
+        },
         tabBarStyle: {
-          backgroundColor: '#fff',
-          borderTopWidth: 1,
-          borderTopColor: '#f0f0f0',
-          height: 80,
-          paddingBottom: 10,
+          backgroundColor: COLORS.white,
+          borderTopWidth: 0,
+          elevation: 12,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.1,
+          shadowRadius: 12,
+          height: 85,
+          paddingTop: SPACING.sm,
         },
       }}
     >
@@ -44,9 +55,7 @@ const MainTabNavigator: React.FC = () => {
         component={TruckStackNavigator}
         initialParams={{ status: 'En service' }}
         options={{
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon label="En service" color={color} focused={focused} />
-          ),
+          tabBarIcon: ({ color, focused }) => <TruckIcon color={color} focused={focused} />,
         }}
       />
       <Tab.Screen
@@ -54,9 +63,7 @@ const MainTabNavigator: React.FC = () => {
         component={TruckStackNavigator}
         initialParams={{ status: "À l'arrêt" }}
         options={{
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon label="À l'arrêt" color={color} focused={focused} />
-          ),
+          tabBarIcon: ({ color, focused }) => <StopIcon color={color} focused={focused} />,
         }}
       />
       <Tab.Screen
@@ -64,9 +71,7 @@ const MainTabNavigator: React.FC = () => {
         component={TruckStackNavigator}
         initialParams={{ status: 'En maintenance' }}
         options={{
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon label="En maintenance" color={color} focused={focused} />
-          ),
+          tabBarIcon: ({ color, focused }) => <WrenchIcon color={color} focused={focused} />,
         }}
       />
     </Tab.Navigator>
@@ -74,16 +79,8 @@ const MainTabNavigator: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  tabIcon: {
-    alignItems: 'center',
-  },
-  tabIconText: {
-    fontSize: 16,
-    marginBottom: 2,
-  },
-  tabLabel: {
-    fontSize: 10,
-    fontWeight: '600',
+  icon: {
+    fontSize: 22,
   },
 });
 
